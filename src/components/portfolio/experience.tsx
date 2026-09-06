@@ -26,7 +26,9 @@ export const Experience = component$(() => {
           <span class="mt-2 inline-block rounded border border-border-line bg-surface px-2 py-0.5 font-mono text-xs text-cyan">
             {entry.company}
           </span>
-          <p class="mt-3 max-w-xl text-ink-muted">{entry.description}</p>
+          <p class="mt-3 max-w-xl text-justify text-ink-muted hyphens-auto">
+            {entry.description}
+          </p>
         </div>
       </li>
     );

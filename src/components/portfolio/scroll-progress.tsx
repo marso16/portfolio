@@ -3,7 +3,7 @@ import { component$, useSignal, useVisibleTask$ } from "@builder.io/qwik";
 export const ScrollProgress = component$(() => {
   const progress = useSignal(0);
 
-  // Reflects real scroll position, not decorative — a status readout, so it
+  // Reflects real scroll position, not decorative - a status readout, so it
   // runs regardless of prefers-reduced-motion.
   // eslint-disable-next-line qwik/no-use-visible-task
   useVisibleTask$(({ cleanup }) => {

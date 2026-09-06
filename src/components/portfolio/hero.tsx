@@ -14,7 +14,7 @@ export const Hero = component$(() => {
   // card is visible, so it isn't deferrable to useTask$.
   // eslint-disable-next-line qwik/no-use-visible-task
   useVisibleTask$(({ cleanup }) => {
-    // A real elapsed-time readout, not decorative motion — ticks regardless
+    // A real elapsed-time readout, not decorative motion - ticks regardless
     // of prefers-reduced-motion.
     const uptimeInterval = setInterval(() => {
       uptimeSeconds.value += 1;
@@ -57,7 +57,7 @@ export const Hero = component$(() => {
       if (t < 1) {
         frame = requestAnimationFrame(step);
       } else {
-        // Convergence finished — keep the run reading as live rather than frozen.
+        // Convergence finished - keep the run reading as live rather than frozen.
         interval = setInterval(() => {
           epoch.value += 1;
           loss.value = Math.max(0.08, finalLoss + (Math.random() - 0.5) * 0.01);
@@ -84,7 +84,9 @@ export const Hero = component$(() => {
           {profile.name}
         </h1>
         <p class="mt-2 text-xl text-ink-muted">{profile.title}</p>
-        <p class="mt-6 max-w-md text-ink-muted">{profile.bio}</p>
+        <p class="mt-6 max-w-md text-justify text-ink-muted hyphens-auto">
+          {profile.bio}
+        </p>
         <div class="mt-8 flex items-center gap-6 text-sm">
           <a
             href="#projects"
