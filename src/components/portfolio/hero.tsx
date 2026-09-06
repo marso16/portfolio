@@ -10,12 +10,7 @@ export const Hero = component$(() => {
   const uptimeSeconds = useSignal(0);
   const pathRef = useSignal<SVGPolylineElement>();
 
-  // Needs the real DOM (path length, prefers-reduced-motion, rAF) once the
-  // card is visible, so it isn't deferrable to useTask$.
-  // eslint-disable-next-line qwik/no-use-visible-task
   useVisibleTask$(({ cleanup }) => {
-    // A real elapsed-time readout, not decorative motion - ticks regardless
-    // of prefers-reduced-motion.
     const uptimeInterval = setInterval(() => {
       uptimeSeconds.value += 1;
     }, 1000);
@@ -39,7 +34,6 @@ export const Hero = component$(() => {
     if (path) {
       path.style.strokeDasharray = `${length}`;
       path.style.strokeDashoffset = `${length}`;
-      // Force layout before transitioning.
       path.getBoundingClientRect();
       path.style.transition = "stroke-dashoffset 2.4s ease-out";
       path.style.strokeDashoffset = "0";
@@ -57,7 +51,6 @@ export const Hero = component$(() => {
       if (t < 1) {
         frame = requestAnimationFrame(step);
       } else {
-        // Convergence finished - keep the run reading as live rather than frozen.
         interval = setInterval(() => {
           epoch.value += 1;
           loss.value = Math.max(0.08, finalLoss + (Math.random() - 0.5) * 0.01);

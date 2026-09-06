@@ -1,7 +1,7 @@
 import { component$, useSignal } from "@builder.io/qwik";
 import { experience } from "./data";
 
-const VISIBLE_COUNT = 2;
+const VISIBLE_COUNT = 3;
 
 export const Experience = component$(() => {
   const expanded = useSignal(false);
