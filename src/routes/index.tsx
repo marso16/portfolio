@@ -11,34 +11,33 @@ import { Skills } from "~/components/portfolio/skills";
 import { Contact } from "~/components/portfolio/contact";
 import { CONTENT_KEYS, getRedisFromEnv, readAllContent } from "~/lib/redis";
 import {
-  experience as fallbackExperience,
-  profile as fallbackProfile,
-  projects as fallbackProjects,
-  skills as fallbackSkills,
   type ExperienceEntry,
   type Profile,
   type Project,
   type SkillGroup,
 } from "~/components/portfolio/data";
 
+const EMPTY_PROFILE: Profile = {
+  name: "",
+  title: "",
+  bio: "",
+  aboutParagraphs: [],
+  email: "",
+  github: "",
+  linkedin: "",
+};
+
 export const usePortfolioContent = routeLoader$(async (event) => {
   const redis = getRedisFromEnv(event.env);
 
-  const fallbacks: [Profile, ExperienceEntry[], Project[], SkillGroup[], string] =
-    [fallbackProfile, fallbackExperience, fallbackProjects, fallbackSkills, "/resume.pdf"];
-
   const [profile, experience, projects, skills, resumeUrl] =
-    await readAllContent(
-      redis,
-      [
-        CONTENT_KEYS.profile,
-        CONTENT_KEYS.experience,
-        CONTENT_KEYS.projects,
-        CONTENT_KEYS.skills,
-        CONTENT_KEYS.resumeUrl,
-      ],
-      fallbacks,
-    );
+    await readAllContent(redis, [
+      CONTENT_KEYS.profile,
+      CONTENT_KEYS.experience,
+      CONTENT_KEYS.projects,
+      CONTENT_KEYS.skills,
+      CONTENT_KEYS.resumeUrl,
+    ]);
 
   // Let the CDN absorb repeat traffic instead of hitting Redis on every
   // request: serve from cache for up to 60s, and up to a day stale while
@@ -48,7 +47,13 @@ export const usePortfolioContent = routeLoader$(async (event) => {
     maxAge: 60,
   });
 
-  return { profile, experience, projects, skills, resumeUrl };
+  return {
+    profile: (profile as Profile | null) ?? EMPTY_PROFILE,
+    experience: (experience as ExperienceEntry[] | null) ?? [],
+    projects: (projects as Project[] | null) ?? [],
+    skills: (skills as SkillGroup[] | null) ?? [],
+    resumeUrl: (resumeUrl as string | null) ?? "",
+  };
 });
 
 export default component$(() => {

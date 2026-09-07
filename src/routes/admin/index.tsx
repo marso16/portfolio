@@ -16,15 +16,21 @@ import {
 } from "~/lib/redis";
 import { COOKIE_NAME } from "~/lib/session";
 import {
-  experience as fallbackExperience,
-  profile as fallbackProfile,
-  projects as fallbackProjects,
-  skills as fallbackSkills,
   type ExperienceEntry,
   type Profile,
   type Project,
   type SkillGroup,
 } from "~/components/portfolio/data";
+
+const EMPTY_PROFILE: Profile = {
+  name: "",
+  title: "",
+  bio: "",
+  aboutParagraphs: [],
+  email: "",
+  github: "",
+  linkedin: "",
+};
 import { ProfileForm } from "~/components/admin/profile-form";
 import { ExperienceEditor } from "~/components/admin/experience-editor";
 import { ProjectsEditor } from "~/components/admin/projects-editor";
@@ -37,18 +43,20 @@ export const useAdminContent = routeLoader$(async (event) => {
   const redis = getRedisFromEnv(event.env);
 
   const [profile, experience, projects, skills, resumeUrl] = await Promise.all([
-    readContent<Profile>(redis, CONTENT_KEYS.profile, fallbackProfile),
-    readContent<ExperienceEntry[]>(
-      redis,
-      CONTENT_KEYS.experience,
-      fallbackExperience,
-    ),
-    readContent<Project[]>(redis, CONTENT_KEYS.projects, fallbackProjects),
-    readContent<SkillGroup[]>(redis, CONTENT_KEYS.skills, fallbackSkills),
-    readContent<string>(redis, CONTENT_KEYS.resumeUrl, "/resume.pdf"),
+    readContent<Profile>(redis, CONTENT_KEYS.profile),
+    readContent<ExperienceEntry[]>(redis, CONTENT_KEYS.experience),
+    readContent<Project[]>(redis, CONTENT_KEYS.projects),
+    readContent<SkillGroup[]>(redis, CONTENT_KEYS.skills),
+    readContent<string>(redis, CONTENT_KEYS.resumeUrl),
   ]);
 
-  return { profile, experience, projects, skills, resumeUrl };
+  return {
+    profile: profile ?? EMPTY_PROFILE,
+    experience: experience ?? [],
+    projects: projects ?? [],
+    skills: skills ?? [],
+    resumeUrl: resumeUrl ?? "",
+  };
 });
 
 function getRedisFromEvent(event: RequestEventAction) {
@@ -187,11 +195,8 @@ export const useUploadResume = routeAction$(async (form, event) => {
   }
 
   const redis = getRedisFromEvent(event);
-  const previousUrl = await readContent<string>(
-    redis,
-    CONTENT_KEYS.resumeUrl,
-    "",
-  );
+  const previousUrl =
+    (await readContent<string>(redis, CONTENT_KEYS.resumeUrl)) ?? "";
 
   const blob = await put(`resume-${Date.now()}.pdf`, file, {
     access: "public",

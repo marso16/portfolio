@@ -41,39 +41,34 @@ export function getRedisFromEnv(env: EnvGetter): Redis | null {
 export async function readContent<T>(
   redis: Redis | null,
   key: string,
-  fallback: T,
-): Promise<T> {
-  if (!redis) return fallback;
+): Promise<T | null> {
+  if (!redis) return null;
   try {
-    const value = await redis.get<T>(key);
-    return value ?? fallback;
+    return await redis.get<T>(key);
   } catch (error) {
     console.error(`readContent: failed to read key "${key}"`, error);
-    return fallback;
+    return null;
   }
 }
 
 /**
  * Batched version of `readContent` for reading several keys in a single
- * round trip via Redis `MGET`. Falls back to the corresponding per-key
- * fallback when a slot comes back null/undefined, when Redis isn't
- * configured, or when the `mget` call itself throws.
+ * round trip via Redis `MGET`. Returns `null` for any slot that's unset,
+ * when Redis isn't configured, or when the `mget` call itself throws.
  */
-export async function readAllContent<T extends readonly unknown[]>(
+export async function readAllContent(
   redis: Redis | null,
   keys: readonly string[],
-  fallbacks: T,
-): Promise<T> {
-  if (!redis) return fallbacks;
+): Promise<(unknown | null)[]> {
+  if (!redis) return keys.map(() => null);
   try {
-    const values = await redis.mget<unknown[]>(...keys);
-    return keys.map((_key, i) => values[i] ?? fallbacks[i]) as unknown as T;
+    return await redis.mget<unknown[]>(...keys);
   } catch (error) {
     console.error(
       `readAllContent: failed to mget keys [${keys.join(", ")}]`,
       error,
     );
-    return fallbacks;
+    return keys.map(() => null);
   }
 }
 
