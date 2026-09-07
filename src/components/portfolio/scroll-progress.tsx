@@ -3,6 +3,7 @@ import { component$, useSignal, useVisibleTask$ } from "@builder.io/qwik";
 export const ScrollProgress = component$(() => {
   const progress = useSignal(0);
 
+  // eslint-disable-next-line qwik/no-use-visible-task
   useVisibleTask$(({ cleanup }) => {
     const onScroll = () => {
       const doc = document.documentElement;

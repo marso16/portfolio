@@ -43,50 +43,50 @@ export const experience: ExperienceEntry[] = [
   },
 ];
 
-// export const projects = [
-//   {
-//     name: "nahr-ibrahim-watershed",
-//     language: "Python",
-//     languageColor: "#e7a445",
-//     description:
-//       "Testing AI Models for Climate-Resilient Rainfall–Runoff Modeling in the Nahr Ibrahim Watershed, Lebanon",
-//     impact: "Cut manual eval time from hours to minutes per model change.",
-//     tags: ["pytorch", "scikit-learn", "pandas", "geojson"],
-//     link: "https://github.com/marso16/nahr_ibrahim_watershed",
-//   },
-//   {
-//     name: "infra-as-code-templates",
-//     language: "TypeScript",
-//     languageColor: "#5fd4d0",
-//     description:
-//       "Reusable Terraform + CDK modules for standing up ML training and inference infrastructure on AWS.",
-//     impact: "Reduced new environment setup from days to under an hour.",
-//     tags: ["terraform", "aws", "cdk"],
-//     link: "https://github.com/marso16/suplr",
-//   },
-//   {
-//     name: "agent-router",
-//     language: "Python",
-//     languageColor: "#e7a445",
-//     description:
-//       "Lightweight orchestration layer for routing tasks between specialized LLM agents with fallback and cost controls.",
-//     impact:
-//       "Cut per-request cost by defaulting to smaller models without hurting p95 latency.",
-//     tags: ["fastapi", "langgraph", "redis"],
-//     link: "https://github.com/marso16",
-//   },
-//   {
-//     name: "realtime-dashboard",
-//     language: "TypeScript",
-//     languageColor: "#5fd4d0",
-//     description:
-//       "Streaming metrics dashboard for model training runs: live loss curves, GPU utilization, and alerting.",
-//     impact:
-//       "Caught training regressions same-day instead of after the run finished.",
-//     tags: ["qwik", "websockets", "d3"],
-//     link: "https://github.com/marso16",
-//   },
-// ];
+export const projects = [
+  {
+    name: "nahr-ibrahim-watershed",
+    language: "Python",
+    languageColor: "#e7a445",
+    description:
+      "Testing AI Models for Climate-Resilient Rainfall–Runoff Modeling in the Nahr Ibrahim Watershed, Lebanon",
+    impact: "Cut manual eval time from hours to minutes per model change.",
+    tags: ["pytorch", "scikit-learn", "pandas", "geojson"],
+    link: "https://github.com/marso16/nahr_ibrahim_watershed",
+  },
+  {
+    name: "infra-as-code-templates",
+    language: "TypeScript",
+    languageColor: "#5fd4d0",
+    description:
+      "Reusable Terraform + CDK modules for standing up ML training and inference infrastructure on AWS.",
+    impact: "Reduced new environment setup from days to under an hour.",
+    tags: ["terraform", "aws", "cdk"],
+    link: "https://github.com/marso16/suplr",
+  },
+  {
+    name: "agent-router",
+    language: "Python",
+    languageColor: "#e7a445",
+    description:
+      "Lightweight orchestration layer for routing tasks between specialized LLM agents with fallback and cost controls.",
+    impact:
+      "Cut per-request cost by defaulting to smaller models without hurting p95 latency.",
+    tags: ["fastapi", "langgraph", "redis"],
+    link: "https://github.com/marso16",
+  },
+  {
+    name: "realtime-dashboard",
+    language: "TypeScript",
+    languageColor: "#5fd4d0",
+    description:
+      "Streaming metrics dashboard for model training runs: live loss curves, GPU utilization, and alerting.",
+    impact:
+      "Caught training regressions same-day instead of after the run finished.",
+    tags: ["qwik", "websockets", "d3"],
+    link: "https://github.com/marso16",
+  },
+];
 
 export const skills = [
   { key: "languages", values: ["Python", "Java", "JavaScript", "Rust"] },

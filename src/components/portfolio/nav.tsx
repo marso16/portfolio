@@ -3,10 +3,12 @@ import { component$, useSignal } from "@builder.io/qwik";
 const links = [
   { href: "#about", label: "About" },
   { href: "#experience", label: "Experience" },
-  // { href: "#projects", label: "Projects" },
+  { href: "#projects", label: "Projects" },
   { href: "#skills", label: "Skills" },
   { href: "#contact", label: "Contact" },
 ];
+
+const resumeLink = { href: "/resume.pdf", label: "Resume" };
 
 export const Nav = component$(() => {
   const menuOpen = useSignal(false);
@@ -33,6 +35,16 @@ export const Nav = component$(() => {
               </a>
             </li>
           ))}
+          <li>
+            <a
+              href={resumeLink.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-amber underline decoration-amber/40 underline-offset-4 hover:decoration-amber"
+            >
+              {resumeLink.label}
+            </a>
+          </li>
         </ul>
         <button
           type="button"
@@ -90,6 +102,16 @@ export const Nav = component$(() => {
               </a>
             </li>
           ))}
+          <li>
+            <a
+              href={resumeLink.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="block py-3.5 text-sm text-amber hover:text-ink"
+            >
+              {resumeLink.label}
+            </a>
+          </li>
         </ul>
       </div>
     </header>

@@ -10,6 +10,7 @@ export const Hero = component$(() => {
   const uptimeSeconds = useSignal(0);
   const pathRef = useSignal<SVGPolylineElement>();
 
+  // eslint-disable-next-line qwik/no-use-visible-task
   useVisibleTask$(({ cleanup }) => {
     const uptimeInterval = setInterval(() => {
       uptimeSeconds.value += 1;
