@@ -1,7 +1,12 @@
 import { component$ } from "@builder.io/qwik";
-import { Form, routeLoader$, routeAction$ } from "@builder.io/qwik-city";
+import {
+  Form,
+  routeLoader$,
+  routeAction$,
+  type RequestEventAction,
+} from "@builder.io/qwik-city";
 import { requireAdminSession } from "~/lib/admin-guard";
-import { CONTENT_KEYS, getRedis, readContent } from "~/lib/redis";
+import { CONTENT_KEYS, getRedis, readContent, writeContent } from "~/lib/redis";
 import { COOKIE_NAME } from "~/lib/session";
 import {
   experience as fallbackExperience,
@@ -13,6 +18,7 @@ import {
   type Project,
   type SkillGroup,
 } from "~/components/portfolio/data";
+import { ProfileForm } from "~/components/admin/profile-form";
 
 export const useAdminContent = routeLoader$(async (event) => {
   await requireAdminSession(event);
@@ -38,6 +44,31 @@ export const useAdminContent = routeLoader$(async (event) => {
   return { profile, experience, projects, skills, resumeUrl };
 });
 
+function getRedisFromEvent(event: RequestEventAction) {
+  return getRedis(
+    event.env.get("UPSTASH_REDIS_REST_URL"),
+    event.env.get("UPSTASH_REDIS_REST_TOKEN"),
+  );
+}
+
+export const useUpdateProfile = routeAction$(async (form, event) => {
+  await requireAdminSession(event);
+  const updated: Profile = {
+    name: String(form.name ?? ""),
+    title: String(form.title ?? ""),
+    bio: String(form.bio ?? ""),
+    aboutParagraphs: String(form.aboutParagraphs ?? "")
+      .split(/\n\s*\n/)
+      .map((p) => p.trim())
+      .filter(Boolean),
+    email: String(form.email ?? ""),
+    github: String(form.github ?? ""),
+    linkedin: String(form.linkedin ?? ""),
+  };
+  await writeContent(getRedisFromEvent(event), CONTENT_KEYS.profile, updated);
+  return { success: true };
+});
+
 export const useLogout = routeAction$(async (_form, event) => {
   event.cookie.delete(COOKIE_NAME, { path: "/" });
   throw event.redirect(302, "/admin/login");
@@ -46,6 +77,7 @@ export const useLogout = routeAction$(async (_form, event) => {
 export default component$(() => {
   const content = useAdminContent();
   const logout = useLogout();
+  const updateProfile = useUpdateProfile();
 
   return (
     <div class="mx-auto max-w-3xl px-6 py-12">
@@ -57,11 +89,7 @@ export default component$(() => {
           </button>
         </Form>
       </div>
-      <p class="mt-2 text-sm text-ink-muted">
-        Loaded {content.value.experience.length} experience entries,{" "}
-        {content.value.projects.length} projects,{" "}
-        {content.value.skills.length} skill groups.
-      </p>
+      <ProfileForm profile={content.value.profile} action={updateProfile} />
     </div>
   );
 });
