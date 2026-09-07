@@ -5,6 +5,7 @@ import {
   routeAction$,
   type RequestEventAction,
 } from "@builder.io/qwik-city";
+import { del, put } from "@vercel/blob";
 import { requireAdminSession } from "~/lib/admin-guard";
 import { CONTENT_KEYS, getRedis, readContent, writeContent } from "~/lib/redis";
 import { COOKIE_NAME } from "~/lib/session";
@@ -22,6 +23,7 @@ import { ProfileForm } from "~/components/admin/profile-form";
 import { ExperienceEditor } from "~/components/admin/experience-editor";
 import { ProjectsEditor } from "~/components/admin/projects-editor";
 import { SkillsEditor } from "~/components/admin/skills-editor";
+import { ResumeUploader } from "~/components/admin/resume-uploader";
 
 export const useAdminContent = routeLoader$(async (event) => {
   await requireAdminSession(event);
@@ -31,18 +33,17 @@ export const useAdminContent = routeLoader$(async (event) => {
     event.env.get("UPSTASH_REDIS_REST_TOKEN"),
   );
 
-  const [profile, experience, projects, skills, resumeUrl] =
-    await Promise.all([
-      readContent<Profile>(redis, CONTENT_KEYS.profile, fallbackProfile),
-      readContent<ExperienceEntry[]>(
-        redis,
-        CONTENT_KEYS.experience,
-        fallbackExperience,
-      ),
-      readContent<Project[]>(redis, CONTENT_KEYS.projects, fallbackProjects),
-      readContent<SkillGroup[]>(redis, CONTENT_KEYS.skills, fallbackSkills),
-      readContent<string>(redis, CONTENT_KEYS.resumeUrl, "/resume.pdf"),
-    ]);
+  const [profile, experience, projects, skills, resumeUrl] = await Promise.all([
+    readContent<Profile>(redis, CONTENT_KEYS.profile, fallbackProfile),
+    readContent<ExperienceEntry[]>(
+      redis,
+      CONTENT_KEYS.experience,
+      fallbackExperience,
+    ),
+    readContent<Project[]>(redis, CONTENT_KEYS.projects, fallbackProjects),
+    readContent<SkillGroup[]>(redis, CONTENT_KEYS.skills, fallbackSkills),
+    readContent<string>(redis, CONTENT_KEYS.resumeUrl, "/resume.pdf"),
+  ]);
 
   return { profile, experience, projects, skills, resumeUrl };
 });
@@ -126,6 +127,40 @@ export const useLogout = routeAction$(async (_form, event) => {
   throw event.redirect(302, "/admin/login");
 });
 
+export const useUploadResume = routeAction$(async (_form, event) => {
+  await requireAdminSession(event);
+
+  const formData = await event.request.formData();
+  const file = formData.get("resume");
+  if (!(file instanceof File) || file.size === 0) {
+    return { success: false, error: "No file provided." };
+  }
+  if (file.type !== "application/pdf") {
+    return { success: false, error: "Only PDF files are allowed." };
+  }
+  if (file.size > 10 * 1024 * 1024) {
+    return { success: false, error: "File must be under 10MB." };
+  }
+
+  const redis = getRedisFromEvent(event);
+  const previousUrl = await readContent<string>(
+    redis,
+    CONTENT_KEYS.resumeUrl,
+    "",
+  );
+
+  const blob = await put(`resume-${Date.now()}.pdf`, file, {
+    access: "public",
+  });
+  await writeContent(redis, CONTENT_KEYS.resumeUrl, blob.url);
+
+  if (previousUrl.includes("blob.vercel-storage.com")) {
+    await del(previousUrl).catch(() => {});
+  }
+
+  return { success: true, url: blob.url };
+});
+
 export default component$(() => {
   const content = useAdminContent();
   const logout = useLogout();
@@ -133,6 +168,7 @@ export default component$(() => {
   const updateExperience = useUpdateExperience();
   const updateProjects = useUpdateProjects();
   const updateSkills = useUpdateSkills();
+  const uploadResume = useUploadResume();
 
   return (
     <div class="mx-auto max-w-3xl px-6 py-12">
@@ -154,6 +190,10 @@ export default component$(() => {
         action={updateProjects}
       />
       <SkillsEditor groups={content.value.skills} action={updateSkills} />
+      <ResumeUploader
+        currentUrl={content.value.resumeUrl}
+        action={uploadResume}
+      />
     </div>
   );
 });
