@@ -9,7 +9,7 @@ import { Experience } from "~/components/portfolio/experience";
 import { Projects } from "~/components/portfolio/projects";
 import { Skills } from "~/components/portfolio/skills";
 import { Contact } from "~/components/portfolio/contact";
-import { CONTENT_KEYS, getRedis, readContent } from "~/lib/redis";
+import { CONTENT_KEYS, getRedis, readAllContent } from "~/lib/redis";
 import {
   experience as fallbackExperience,
   profile as fallbackProfile,
@@ -27,18 +27,29 @@ export const usePortfolioContent = routeLoader$(async (event) => {
     event.env.get("UPSTASH_REDIS_REST_TOKEN"),
   );
 
+  const fallbacks: [Profile, ExperienceEntry[], Project[], SkillGroup[], string] =
+    [fallbackProfile, fallbackExperience, fallbackProjects, fallbackSkills, "/resume.pdf"];
+
   const [profile, experience, projects, skills, resumeUrl] =
-    await Promise.all([
-      readContent<Profile>(redis, CONTENT_KEYS.profile, fallbackProfile),
-      readContent<ExperienceEntry[]>(
-        redis,
+    await readAllContent(
+      redis,
+      [
+        CONTENT_KEYS.profile,
         CONTENT_KEYS.experience,
-        fallbackExperience,
-      ),
-      readContent<Project[]>(redis, CONTENT_KEYS.projects, fallbackProjects),
-      readContent<SkillGroup[]>(redis, CONTENT_KEYS.skills, fallbackSkills),
-      readContent<string>(redis, CONTENT_KEYS.resumeUrl, "/resume.pdf"),
-    ]);
+        CONTENT_KEYS.projects,
+        CONTENT_KEYS.skills,
+        CONTENT_KEYS.resumeUrl,
+      ],
+      fallbacks,
+    );
+
+  // Let the CDN absorb repeat traffic instead of hitting Redis on every
+  // request: serve from cache for up to 60s, and up to a day stale while
+  // a fresh copy is fetched in the background.
+  event.cacheControl({
+    staleWhileRevalidate: 86400,
+    maxAge: 60,
+  });
 
   return { profile, experience, projects, skills, resumeUrl };
 });

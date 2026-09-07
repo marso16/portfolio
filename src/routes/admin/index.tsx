@@ -55,6 +55,29 @@ function getRedisFromEvent(event: RequestEventAction) {
   );
 }
 
+/**
+ * Wraps `writeContent` so a misconfigured/unreachable Redis (which
+ * `writeContent` signals by throwing) turns into the same
+ * `{ success: false, error }` shape the editors already know how to
+ * render, instead of an uncaught 500.
+ */
+async function writeContentSafely<T>(
+  redis: ReturnType<typeof getRedis>,
+  key: string,
+  value: T,
+  label: string,
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    await writeContent(redis, key, value);
+    return { success: true };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : `Failed to save ${label}.`,
+    };
+  }
+}
+
 export const useUpdateProfile = routeAction$(async (form, event) => {
   await requireAdminSession(event);
   const updated: Profile = {
@@ -69,8 +92,12 @@ export const useUpdateProfile = routeAction$(async (form, event) => {
     github: String(form.github ?? ""),
     linkedin: String(form.linkedin ?? ""),
   };
-  await writeContent(getRedisFromEvent(event), CONTENT_KEYS.profile, updated);
-  return { success: true };
+  return writeContentSafely(
+    getRedisFromEvent(event),
+    CONTENT_KEYS.profile,
+    updated,
+    "profile",
+  );
 });
 
 export const useUpdateExperience = routeAction$(async (form, event) => {
@@ -84,12 +111,12 @@ export const useUpdateExperience = routeAction$(async (form, event) => {
   if (!Array.isArray(entries)) {
     return { success: false, error: "Invalid experience data." };
   }
-  await writeContent(
+  return writeContentSafely(
     getRedisFromEvent(event),
     CONTENT_KEYS.experience,
     entries,
+    "experience",
   );
-  return { success: true };
 });
 
 export const useUpdateProjects = routeAction$(async (form, event) => {
@@ -103,8 +130,12 @@ export const useUpdateProjects = routeAction$(async (form, event) => {
   if (!Array.isArray(items)) {
     return { success: false, error: "Invalid project data." };
   }
-  await writeContent(getRedisFromEvent(event), CONTENT_KEYS.projects, items);
-  return { success: true };
+  return writeContentSafely(
+    getRedisFromEvent(event),
+    CONTENT_KEYS.projects,
+    items,
+    "projects",
+  );
 });
 
 export const useUpdateSkills = routeAction$(async (form, event) => {
@@ -118,8 +149,12 @@ export const useUpdateSkills = routeAction$(async (form, event) => {
   if (!Array.isArray(groups)) {
     return { success: false, error: "Invalid skills data." };
   }
-  await writeContent(getRedisFromEvent(event), CONTENT_KEYS.skills, groups);
-  return { success: true };
+  return writeContentSafely(
+    getRedisFromEvent(event),
+    CONTENT_KEYS.skills,
+    groups,
+    "skills",
+  );
 });
 
 export const useLogout = routeAction$(async (_form, event) => {
@@ -127,11 +162,15 @@ export const useLogout = routeAction$(async (_form, event) => {
   throw event.redirect(302, "/admin/login");
 });
 
-export const useUploadResume = routeAction$(async (_form, event) => {
+export const useUploadResume = routeAction$(async (form, event) => {
   await requireAdminSession(event);
 
-  const formData = await event.request.formData();
-  const file = formData.get("resume");
+  // Qwik City already parses the multipart body (`parseBody()`) before
+  // invoking this action and hands the result in as `form` — the request
+  // body has already been consumed, so calling `event.request.formData()`
+  // again here would throw "Body is unusable: Body has already been read".
+  // `formToObj` preserves `File` values as-is, so read it straight off `form`.
+  const file = form.resume;
   if (!(file instanceof File) || file.size === 0) {
     return { success: false, error: "No file provided." };
   }
@@ -140,6 +179,11 @@ export const useUploadResume = routeAction$(async (_form, event) => {
   }
   if (file.size > 10 * 1024 * 1024) {
     return { success: false, error: "File must be under 10MB." };
+  }
+
+  const blobToken = event.env.get("BLOB_READ_WRITE_TOKEN");
+  if (!blobToken) {
+    return { success: false, error: "Blob storage is not configured." };
   }
 
   const redis = getRedisFromEvent(event);
@@ -151,11 +195,12 @@ export const useUploadResume = routeAction$(async (_form, event) => {
 
   const blob = await put(`resume-${Date.now()}.pdf`, file, {
     access: "public",
+    token: blobToken,
   });
   await writeContent(redis, CONTENT_KEYS.resumeUrl, blob.url);
 
   if (previousUrl.includes("blob.vercel-storage.com")) {
-    await del(previousUrl).catch(() => {});
+    await del(previousUrl, { token: blobToken }).catch(() => {});
   }
 
   return { success: true, url: blob.url };

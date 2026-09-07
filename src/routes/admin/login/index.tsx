@@ -26,7 +26,7 @@ export const useLogin = routeAction$(async (form, event) => {
     return { success: false, error: "Admin login is not configured." };
   }
 
-  const ip = event.request.headers.get("x-forwarded-for") ?? "unknown";
+  const ip = event.clientConn.ip ?? "unknown";
   const limiter = createLoginRateLimiter(
     event.env.get("UPSTASH_REDIS_REST_URL"),
     event.env.get("UPSTASH_REDIS_REST_TOKEN"),

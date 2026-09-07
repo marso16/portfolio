@@ -5,7 +5,7 @@ import type { Profile } from "~/components/portfolio/data";
 interface ProfileFormProps {
   profile: Profile;
   action: ActionStore<
-    { success: boolean } | undefined,
+    { success: boolean; error?: string } | undefined,
     Record<string, unknown>,
     boolean
   >;
@@ -83,6 +83,9 @@ export const ProfileForm = component$<ProfileFormProps>(
           </button>
           {action.value?.success && (
             <p class="text-sm text-cyan">Saved.</p>
+          )}
+          {action.value?.error && (
+            <p class="text-sm text-red-400">{action.value.error}</p>
           )}
         </Form>
       </section>

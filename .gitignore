@@ -5,3 +5,6 @@
 [c-e][n-p][b-d][r-t]/
 [m-o][n-p][c-e][d-f]_[l-n][n-p][c-e][t-v][k-m][d-f][r-t]/
 PRODUCT.md
+.env
+.env.*
+!.env.example
