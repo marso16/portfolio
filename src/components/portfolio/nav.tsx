@@ -8,9 +8,7 @@ const links = [
   { href: "#contact", label: "Contact" },
 ];
 
-const resumeLink = { href: "/resume.pdf", label: "Resume" };
-
-export const Nav = component$(() => {
+export const Nav = component$<{ resumeUrl: string }>(({ resumeUrl }) => {
   const menuOpen = useSignal(false);
 
   return (
@@ -37,12 +35,12 @@ export const Nav = component$(() => {
           ))}
           <li>
             <a
-              href={resumeLink.href}
+              href={resumeUrl}
               target="_blank"
               rel="noopener noreferrer"
               class="text-amber underline decoration-amber/40 underline-offset-4 hover:decoration-amber"
             >
-              {resumeLink.label}
+              Resume
             </a>
           </li>
         </ul>
@@ -104,12 +102,12 @@ export const Nav = component$(() => {
           ))}
           <li>
             <a
-              href={resumeLink.href}
+              href={resumeUrl}
               target="_blank"
               rel="noopener noreferrer"
               class="block py-3.5 text-sm text-amber hover:text-ink"
             >
-              {resumeLink.label}
+              Resume
             </a>
           </li>
         </ul>

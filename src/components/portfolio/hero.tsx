@@ -1,10 +1,10 @@
 import { component$, useSignal, useVisibleTask$ } from "@builder.io/qwik";
-import { profile } from "./data";
+import type { Profile } from "./data";
 
 const SPARK_POINTS =
   "0,52 18,46 36,38 54,29 72,22 90,17 108,13 126,10.5 144,8.5 162,7.2 180,6.4 198,6";
 
-export const Hero = component$(() => {
+export const Hero = component$<{ profile: Profile }>(({ profile }) => {
   const epoch = useSignal(0);
   const loss = useSignal(4.82);
   const uptimeSeconds = useSignal(0);

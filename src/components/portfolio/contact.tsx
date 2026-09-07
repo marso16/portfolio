@@ -1,7 +1,7 @@
 import { $, component$, useSignal } from "@builder.io/qwik";
-import { profile } from "./data";
+import type { Profile } from "./data";
 
-export const Contact = component$(() => {
+export const Contact = component$<{ profile: Profile }>(({ profile }) => {
   const copied = useSignal(false);
 
   const copyEmail = $(async () => {

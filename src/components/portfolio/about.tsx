@@ -1,7 +1,7 @@
 import { component$ } from "@builder.io/qwik";
-import { profile } from "./data";
+import type { Profile } from "./data";
 
-export const About = component$(() => {
+export const About = component$<{ profile: Profile }>(({ profile }) => {
   return (
     <section class="border-t border-border-line bg-surface/40">
       <div class="mx-auto max-w-5xl scroll-mt-24 px-6 py-10" id="about">

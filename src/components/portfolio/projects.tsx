@@ -1,13 +1,13 @@
 import { component$ } from "@builder.io/qwik";
-import { projects } from "./data";
+import type { Project } from "./data";
 
-export const Projects = component$(() => {
+export const Projects = component$<{ entries: Project[] }>(({ entries }) => {
   return (
     <section class="border-t border-border-line bg-surface/40">
       <div class="mx-auto max-w-5xl scroll-mt-24 px-6 py-14" id="projects">
         <p class="font-mono text-sm text-amber">$ ls ~/projects</p>
         <ul class="mt-8 divide-y divide-border-line border-t border-b border-border-line">
-          {projects.map((project) => (
+          {entries.map((project) => (
             <li key={project.name}>
               <div class="-mx-4 rounded-sm px-4 py-5 transition-colors hover:bg-ink/5">
                 <div class="flex flex-wrap items-center justify-between gap-2">
