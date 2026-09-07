@@ -20,6 +20,7 @@ import {
 } from "~/components/portfolio/data";
 import { ProfileForm } from "~/components/admin/profile-form";
 import { ExperienceEditor } from "~/components/admin/experience-editor";
+import { ProjectsEditor } from "~/components/admin/projects-editor";
 
 export const useAdminContent = routeLoader$(async (event) => {
   await requireAdminSession(event);
@@ -89,6 +90,21 @@ export const useUpdateExperience = routeAction$(async (form, event) => {
   return { success: true };
 });
 
+export const useUpdateProjects = routeAction$(async (form, event) => {
+  await requireAdminSession(event);
+  let items: Project[];
+  try {
+    items = JSON.parse(String(form.entries ?? "[]"));
+  } catch {
+    return { success: false, error: "Invalid project data." };
+  }
+  if (!Array.isArray(items)) {
+    return { success: false, error: "Invalid project data." };
+  }
+  await writeContent(getRedisFromEvent(event), CONTENT_KEYS.projects, items);
+  return { success: true };
+});
+
 export const useLogout = routeAction$(async (_form, event) => {
   event.cookie.delete(COOKIE_NAME, { path: "/" });
   throw event.redirect(302, "/admin/login");
@@ -99,6 +115,7 @@ export default component$(() => {
   const logout = useLogout();
   const updateProfile = useUpdateProfile();
   const updateExperience = useUpdateExperience();
+  const updateProjects = useUpdateProjects();
 
   return (
     <div class="mx-auto max-w-3xl px-6 py-12">
@@ -114,6 +131,10 @@ export default component$(() => {
       <ExperienceEditor
         entries={content.value.experience}
         action={updateExperience}
+      />
+      <ProjectsEditor
+        entries={content.value.projects}
+        action={updateProjects}
       />
     </div>
   );
