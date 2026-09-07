@@ -1,7 +1,36 @@
-export const profile = {
+export interface Profile {
+  name: string;
+  title: string;
+  bio: string;
+  aboutParagraphs: string[];
+  email: string;
+  github: string;
+  linkedin: string;
+}
+
+export interface Project {
+  name: string;
+  language: string;
+  languageColor: string;
+  description: string;
+  impact: string;
+  tags: string[];
+  link: string;
+}
+
+export interface SkillGroup {
+  key: string;
+  values: string[];
+}
+
+export const profile: Profile = {
   name: "Marcelino Keyrouz",
   title: "Software engineer & AI engineer",
   bio: "I build production systems end to end, from typed backends and infra to the model pipelines and agents that sit on top of them.",
+  aboutParagraphs: [
+    "I spend most of my time in the space between traditional software engineering and applied AI: designing the services, data pipelines, and infrastructure that make model-backed features reliable enough to run in production, then iterating on the models and prompts that sit on top of them. I care most about systems that are easy to reason about, test, and hand off.",
+    "Most of what I build sits at the boundary between two worlds that don't always speak the same language: the reliability expectations of traditional backend engineering, and the empirical, iterative nature of working with models. I like closing that gap: writing evaluation harnesses instead of eyeballing outputs, treating prompts and pipelines as versioned artifacts, and building the kind of tooling that makes an AI feature boring to operate.",
+  ],
   email: "marcelino.keyrouz16@gmail.com",
   github: "https://github.com/marso16",
   linkedin: "https://www.linkedin.com/in/marcelino-keyrouz-0182b224b/",
@@ -43,7 +72,7 @@ export const experience: ExperienceEntry[] = [
   },
 ];
 
-export const projects = [
+export const projects: Project[] = [
   {
     name: "nahr-ibrahim-watershed",
     language: "Python",
@@ -88,7 +117,7 @@ export const projects = [
   },
 ];
 
-export const skills = [
+export const skills: SkillGroup[] = [
   { key: "languages", values: ["Python", "Java", "JavaScript", "Rust"] },
   {
     key: "ai_ml",
