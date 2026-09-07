@@ -8,3 +8,7 @@ PRODUCT.md
 .env
 .env.*
 !.env.example
+.vercel
+.agents/
+skills-lock.json
+tmp/

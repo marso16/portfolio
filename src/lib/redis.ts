@@ -1,3 +1,4 @@
+import type { EnvGetter } from "@builder.io/qwik-city/middleware/request-handler";
 import { Redis } from "@upstash/redis";
 
 export const CONTENT_KEYS = {
@@ -14,6 +15,27 @@ export function getRedis(
 ): Redis | null {
   if (!url || !token) return null;
   return new Redis({ url, token });
+}
+
+/**
+ * Reads Upstash credentials from the request's env, accepting either the
+ * classic direct-Upstash names or the names Vercel's marketplace "Upstash
+ * for Redis" integration injects (KV_REST_API_*, carried over from the
+ * retired @vercel/kv naming) so either provisioning path works unchanged.
+ */
+export function getUpstashCredentials(env: EnvGetter): {
+  url: string | undefined;
+  token: string | undefined;
+} {
+  return {
+    url: env.get("UPSTASH_REDIS_REST_URL") ?? env.get("KV_REST_API_URL"),
+    token: env.get("UPSTASH_REDIS_REST_TOKEN") ?? env.get("KV_REST_API_TOKEN"),
+  };
+}
+
+export function getRedisFromEnv(env: EnvGetter): Redis | null {
+  const { url, token } = getUpstashCredentials(env);
+  return getRedis(url, token);
 }
 
 export async function readContent<T>(

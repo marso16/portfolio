@@ -9,7 +9,7 @@ import { Experience } from "~/components/portfolio/experience";
 import { Projects } from "~/components/portfolio/projects";
 import { Skills } from "~/components/portfolio/skills";
 import { Contact } from "~/components/portfolio/contact";
-import { CONTENT_KEYS, getRedis, readAllContent } from "~/lib/redis";
+import { CONTENT_KEYS, getRedisFromEnv, readAllContent } from "~/lib/redis";
 import {
   experience as fallbackExperience,
   profile as fallbackProfile,
@@ -22,10 +22,7 @@ import {
 } from "~/components/portfolio/data";
 
 export const usePortfolioContent = routeLoader$(async (event) => {
-  const redis = getRedis(
-    event.env.get("UPSTASH_REDIS_REST_URL"),
-    event.env.get("UPSTASH_REDIS_REST_TOKEN"),
-  );
+  const redis = getRedisFromEnv(event.env);
 
   const fallbacks: [Profile, ExperienceEntry[], Project[], SkillGroup[], string] =
     [fallbackProfile, fallbackExperience, fallbackProjects, fallbackSkills, "/resume.pdf"];

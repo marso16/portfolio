@@ -7,7 +7,13 @@ import {
 } from "@builder.io/qwik-city";
 import { del, put } from "@vercel/blob";
 import { requireAdminSession } from "~/lib/admin-guard";
-import { CONTENT_KEYS, getRedis, readContent, writeContent } from "~/lib/redis";
+import {
+  CONTENT_KEYS,
+  getRedis,
+  getRedisFromEnv,
+  readContent,
+  writeContent,
+} from "~/lib/redis";
 import { COOKIE_NAME } from "~/lib/session";
 import {
   experience as fallbackExperience,
@@ -28,10 +34,7 @@ import { ResumeUploader } from "~/components/admin/resume-uploader";
 export const useAdminContent = routeLoader$(async (event) => {
   await requireAdminSession(event);
 
-  const redis = getRedis(
-    event.env.get("UPSTASH_REDIS_REST_URL"),
-    event.env.get("UPSTASH_REDIS_REST_TOKEN"),
-  );
+  const redis = getRedisFromEnv(event.env);
 
   const [profile, experience, projects, skills, resumeUrl] = await Promise.all([
     readContent<Profile>(redis, CONTENT_KEYS.profile, fallbackProfile),
@@ -49,10 +52,7 @@ export const useAdminContent = routeLoader$(async (event) => {
 });
 
 function getRedisFromEvent(event: RequestEventAction) {
-  return getRedis(
-    event.env.get("UPSTASH_REDIS_REST_URL"),
-    event.env.get("UPSTASH_REDIS_REST_TOKEN"),
-  );
+  return getRedisFromEnv(event.env);
 }
 
 /**

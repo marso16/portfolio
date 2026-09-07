@@ -61,9 +61,7 @@ export const ExperienceEditor = component$<ExperienceEditorProps>(
                 placeholder="Description"
                 value={entry.description}
                 rows={2}
-                onInput$={(_, el) =>
-                  updateRow(i, { description: el.value })
-                }
+                onInput$={(_, el) => updateRow(i, { description: el.value })}
                 class="mt-2 w-full rounded border border-border-line bg-void px-2 py-1 text-sm text-ink"
               />
               <button

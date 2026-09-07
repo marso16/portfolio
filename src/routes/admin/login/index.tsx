@@ -1,6 +1,7 @@
 import { component$ } from "@builder.io/qwik";
 import { Form, routeAction$, routeLoader$ } from "@builder.io/qwik-city";
 import { createLoginRateLimiter } from "~/lib/rate-limit";
+import { getUpstashCredentials } from "~/lib/redis";
 import {
   COOKIE_NAME,
   createSessionToken,
@@ -27,10 +28,8 @@ export const useLogin = routeAction$(async (form, event) => {
   }
 
   const ip = event.clientConn.ip ?? "unknown";
-  const limiter = createLoginRateLimiter(
-    event.env.get("UPSTASH_REDIS_REST_URL"),
-    event.env.get("UPSTASH_REDIS_REST_TOKEN"),
-  );
+  const upstash = getUpstashCredentials(event.env);
+  const limiter = createLoginRateLimiter(upstash.url, upstash.token);
   if (limiter) {
     const { success } = await limiter.limit(ip);
     if (!success) {
