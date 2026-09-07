@@ -1,4 +1,4 @@
-import { component$, useComputed$, useSignal } from "@builder.io/qwik";
+import { $, component$, useComputed$, useSignal } from "@builder.io/qwik";
 import { Form, type ActionStore } from "@builder.io/qwik-city";
 import type { ExperienceEntry } from "~/components/portfolio/data";
 
@@ -16,6 +16,12 @@ export const ExperienceEditor = component$<ExperienceEditorProps>(
     const rows = useSignal<ExperienceEntry[]>(structuredClone(entries));
     const json = useComputed$(() => JSON.stringify(rows.value));
 
+    const updateRow = $((i: number, patch: Partial<ExperienceEntry>) => {
+      rows.value = rows.value.map((row, idx) =>
+        idx === i ? { ...row, ...patch } : row,
+      );
+    });
+
     return (
       <section class="mt-10 border-t border-border-line pt-6">
         <h2 class="text-lg font-semibold text-ink">Experience</h2>
@@ -29,33 +35,25 @@ export const ExperienceEditor = component$<ExperienceEditorProps>(
                 <input
                   placeholder="Date range"
                   value={entry.date}
-                  onInput$={(_, el) =>
-                    (rows.value[i] = { ...rows.value[i], date: el.value })
-                  }
+                  onInput$={(_, el) => updateRow(i, { date: el.value })}
                   class="rounded border border-border-line bg-void px-2 py-1 text-sm text-ink"
                 />
                 <input
                   placeholder="Role"
                   value={entry.role}
-                  onInput$={(_, el) =>
-                    (rows.value[i] = { ...rows.value[i], role: el.value })
-                  }
+                  onInput$={(_, el) => updateRow(i, { role: el.value })}
                   class="rounded border border-border-line bg-void px-2 py-1 text-sm text-ink"
                 />
                 <input
                   placeholder="Company"
                   value={entry.company}
-                  onInput$={(_, el) =>
-                    (rows.value[i] = { ...rows.value[i], company: el.value })
-                  }
+                  onInput$={(_, el) => updateRow(i, { company: el.value })}
                   class="rounded border border-border-line bg-void px-2 py-1 text-sm text-ink"
                 />
                 <input
                   placeholder="Hash"
                   value={entry.hash}
-                  onInput$={(_, el) =>
-                    (rows.value[i] = { ...rows.value[i], hash: el.value })
-                  }
+                  onInput$={(_, el) => updateRow(i, { hash: el.value })}
                   class="rounded border border-border-line bg-void px-2 py-1 text-sm text-ink"
                 />
               </div>
@@ -64,10 +62,7 @@ export const ExperienceEditor = component$<ExperienceEditorProps>(
                 value={entry.description}
                 rows={2}
                 onInput$={(_, el) =>
-                  (rows.value[i] = {
-                    ...rows.value[i],
-                    description: el.value,
-                  })
+                  updateRow(i, { description: el.value })
                 }
                 class="mt-2 w-full rounded border border-border-line bg-void px-2 py-1 text-sm text-ink"
               />
