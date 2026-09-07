@@ -12,3 +12,4 @@ PRODUCT.md
 .agents/
 skills-lock.json
 tmp/
+.agents
