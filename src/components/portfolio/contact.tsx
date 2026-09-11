@@ -11,7 +11,9 @@ export const Contact = component$<{ profile: Profile }>(({ profile }) => {
       setTimeout(() => {
         copied.value = false;
       }, 1500);
-    } catch {}
+    } catch {
+      // Clipboard API unavailable — the mailto link above still works.
+    }
   });
 
   return (
