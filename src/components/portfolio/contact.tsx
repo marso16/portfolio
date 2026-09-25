@@ -65,10 +65,20 @@ export const Contact = component$<{ profile: Profile }>(({ profile }) => {
               )}
             </button>
           </span>
-          <a href={profile.github} class="hover:text-ink w-fit">
+          <a
+            href={profile.github}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="hover:text-ink w-fit"
+          >
             github.com/marso16
           </a>
-          <a href={profile.linkedin} class="hover:text-ink w-fit">
+          <a
+            href={profile.linkedin}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="hover:text-ink w-fit"
+          >
             linkedin
           </a>
         </div>
